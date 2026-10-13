@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>এডমিন প্যানেল - মেসেঞ্জার কন্ট্রোল</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e9efe9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .admin-card { background: #ffffff; width: 100%; max-width: 450px; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .admin-card h2 { color: #0084ff; text-align: center; margin-bottom: 20px; font-size: 24px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #444; }
+        .input-box, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; }
+        .input-box:focus, textarea:focus { border-color: #0084ff; }
+        textarea { resize: vertical; height: 90px; }
+        .send-btn { width: 100%; background: #0084ff; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        .send-btn:hover { background: #0068cc; }
+        .status-msg { margin-top: 15px; text-align: center; font-size: 13px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <h2>মেসেঞ্জার নোটিফিকেশন এডমিন</h2>
+    
+    <div class="form-group">
+        <label for="titleInput">মেসেজের শিরোনাম (Title):</label>
+        <input type="text" id="titleInput" class="input-box" placeholder="যেমন: নতুন বার্তা এসেছে!">
+    </div>
+
+    <div class="form-group">
+        <label for="messageInput">মেসেজ (Body):</label>
+        <textarea id="messageInput" placeholder="আপনার বার্তাটি লিখুন..."></textarea>
+    </div>
+
+    <button class="send-btn" id="sendBtn">নোটিফিকেশন পাঠান</button>
+    <div id="status" class="status-msg"></div>
+</div>
+
+<!-- Firebase SDK Integration -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+
+  // ==========================================
+  // ১. আপনার ফায়ারবেস কনফিগারেশন
+  // ==========================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBQXDEFuilbYDsry-ktqWylIzqgPZNbUWQ",
+    authDomain: "mr-techlabe.firebaseapp.com",
+    databaseURL: "https://mr-techlabe-default-rtdb.firebaseio.com",
+    projectId: "mr-techlabe",
+    storageBucket: "mr-techlabe.firebasestorage.app",
+    messagingSenderId: "172436004844",
+    appId: "1:172436004844:web:466012505fa13297eb2ac9",
+    measurementId: "G-E64JT771TM"
+  };
+
+  // ফায়ারবেস ইনিশিয়ালাইজেশন
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+  // ==========================================
+  // ২. আপনার ডেনো (Deno) সার্ভার লিংক
+  // ==========================================
+  const SERVER_URL = "https://oll.mrmostafizur198.deno.net/";
+
+  document.getElementById('sendBtn').addEventListener('click', async () => {
+      const title = document.getElementById('titleInput').value.trim();
+      const message = document.getElementById('messageInput').value.trim();
+      const statusDiv = document.getElementById('status');
+
+      if (!title || !message) {
+          statusDiv.style.color = "red";
+          statusDiv.innerText = "দয়া করে শিরোনাম এবং বার্তা উভয়ই লিখুন!";
+          return;
+      }
+
+      statusDiv.style.color = "blue";
+      statusDiv.innerText = "মেসেজ পাঠানো হচ্ছে...";
+
+      try {
+          // সার্ভারে নোটিফিকেশন পাঠানোর রিকোয়েস্ট
+          const response = await fetch(SERVER_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  title: title,
+                  body: message
+              })
+          });
+
+          if (response.ok) {
+              statusDiv.style.color = "green";
+              statusDiv.innerText = "সফলভাবে নোটিফিকেশন পাঠানো হয়েছে!";
+              document.getElementById('titleInput').value = '';
+              document.getElementById('messageInput').value = '';
+          } else {
+              throw new Error("Server Response Error");
+          }
+      } catch (error) {
+          console.error("ত্রুটি:", error);
+          statusDiv.style.color = "red";
+          statusDiv.innerText = "পাঠাতে ব্যর্থ হয়েছে! সার্ভার সংযোগ পরীক্ষা করুন।";
+      }
+  });
+</script>
+
+</body>
+</html>

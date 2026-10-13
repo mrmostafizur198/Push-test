@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ইউজার প্যানেল - মেসেঞ্জার নোটিফিকেশন</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
+        .user-card { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 400px; width: 90%; }
+        .user-card h3 { color: #0084ff; margin-bottom: 15px; }
+        .user-card p { font-size: 14px; color: #666; margin-bottom: 20px; line-height: 1.5; }
+        .enable-btn { background: #42b72a; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        .enable-btn:hover { background: #36a422; }
+        .token-info { margin-top: 15px; font-size: 12px; color: #888; word-break: break-all; }
+    </style>
+</head>
+<body>
+
+<div class="user-card">
+    <h3>মেসেঞ্জার নোটিফিকেশন</h3>
+    <p>লাইভ মেসেজ এবং ব্রাউজার পুশ নোটিফিকেশন পেতে নিচে ক্লিক করে অনুমতি দিন।</p>
+    <button class="enable-btn" onclick="requestPermission()">নোটিফিকেশন চালু করুন</button>
+    <div id="tokenDisplay" class="token-info"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+  // ==========================================
+  // ১. আপনার ফায়ারবেস কনফিগারেশন
+  // ==========================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBQXDEFuilbYDsry-ktqWylIzqgPZNbUWQ",
+    authDomain: "mr-techlabe.firebaseapp.com",
+    databaseURL: "https://mr-techlabe-default-rtdb.firebaseio.com",
+    projectId: "mr-techlabe",
+    storageBucket: "mr-techlabe.firebasestorage.app",
+    messagingSenderId: "172436004844",
+    appId: "1:172436004844:web:466012505fa13297eb2ac9",
+    measurementId: "G-E64JT771TM"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const messaging = getMessaging(app);
+
+  // ==========================================
+  // ২. আপনার VAPID কি (Web Push Certificates)
+  // ==========================================
+  const VAPID_KEY = "BJXmr5K0psOK19iiFx2alpYxOlJztTNxqEWLexOr7LOg4b4inIQN3zbaFArw8l7TWoqezeotx-3fJ_7mqUMaaMY";
+
+  // ==========================================
+  // ৩. ডেনো সার্ভার লিঙ্ক
+  // ==========================================
+  const SERVER_URL = "https://oll.mrmostafizur198.deno.net/";
+
+  window.requestPermission = function() {
+      Notification.requestPermission().then((permission) => {
+          if (permission === 'granted') {
+              getToken(messaging, { vapidKey: VAPID_KEY })
+                  .then((currentToken) => {
+                      if (currentToken) {
+                          console.log('FCM Token:', currentToken);
+                          document.getElementById('tokenDisplay').innerText = "অনুমতি সফল হয়েছে! টোকেন অ্যাক্টিভ।";
+
+                          // সার্ভারে রেজিস্ট্রেশন টোকেন পাঠানোর কোড
+                          fetch(SERVER_URL + 'register', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ token: currentToken })
+                          });
+                      } else {
+                          document.getElementById('tokenDisplay').innerText = "কোন টোকেন পাওয়া যায়নি।";
+                      }
+                  })
+                  .catch((err) => {
+                      console.error('Token Error:', err);
+                  });
+          } else {
+              alert('নোটিফিকেশন পারমিশন দেওয়া হয়নি!');
+          }
+      });
+  };
+
+  // ফরগ্রাউন্ডে নোটিফিকেশন পাওয়ার জন্য (যখন অ্যাপ খোলা থাকবে)
+  onMessage(messaging, (payload) => {
+      console.log('মেসেজ এসেছে: ', payload);
+      alert(`নতুন নোটিফিকেশন:\n${payload.notification.title}\n${payload.notification.body}`);
+  });
+</script>
+
+</body>
+</html>
