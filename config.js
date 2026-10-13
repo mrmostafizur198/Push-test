@@ -10,5 +10,5 @@ var CONFIG = {
     // ডাটাবেস অন্য অঞ্চলে হলে এখানে databaseURL: "https://....firebasedatabase.app" যোগ করুন
   },
   // Firebase Console > Project settings > Cloud Messaging > Web Push certificates > Key pair
-  VAPID_KEY: "YOUR_VAPID_KEY"
+  VAPID_KEY: "BJXmr5K0psOK19iiFx2alpYxOlJztTNxqEWLexOr7LOg4b4inIQN3zbaFArw8l7TWoqezeotx-3fJ_7mqUMaaMY"
 };
