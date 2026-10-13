@@ -1,94 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ইউজার প্যানেল - মেসেঞ্জার নোটিফিকেশন</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
-        .user-card { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 400px; width: 90%; }
-        .user-card h3 { color: #0084ff; margin-bottom: 15px; }
-        .user-card p { font-size: 14px; color: #666; margin-bottom: 20px; line-height: 1.5; }
-        .enable-btn { background: #42b72a; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
-        .enable-btn:hover { background: #36a422; }
-        .token-info { margin-top: 15px; font-size: 12px; color: #888; word-break: break-all; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>পুশ ডেমো</title>
+<meta name="theme-color" content="#0B1020">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="toast"><b id="t-title"></b><span id="t-body"></span></div>
 
-<div class="user-card">
-    <h3>মেসেঞ্জার নোটিফিকেশন</h3>
-    <p>লাইভ মেসেজ এবং ব্রাউজার পুশ নোটিফিকেশন পেতে নিচে ক্লিক করে অনুমতি দিন।</p>
-    <button class="enable-btn" onclick="requestPermission()">নোটিফিকেশন চালু করুন</button>
-    <div id="tokenDisplay" class="token-info"></div>
-</div>
+<!-- লগইন -->
+<section id="auth" class="auth" hidden>
+  <div class="box">
+    <h1>🔔 পুশ ডেমো</h1>
+    <p class="sub">লগইন করে নোটিফিকেশন চালু করুন</p>
+    <div class="tabs"><button id="tab-login" class="on" data-act="mode" data-m="login">লগইন</button><button id="tab-reg" data-act="mode" data-m="reg">নতুন অ্যাকাউন্ট</button></div>
+    <label class="fld" id="f-name" hidden><input id="a-name" type="text" placeholder="আপনার নাম" autocomplete="name"></label>
+    <label class="fld"><input id="a-email" type="email" placeholder="ইমেইল" autocomplete="username"></label>
+    <label class="fld"><input id="a-pass" type="password" placeholder="পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)" autocomplete="current-password"></label>
+    <button class="btn" id="a-btn" data-act="auth">লগইন</button>
+    <p class="err" id="a-err"></p>
+  </div>
+</section>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+<!-- হোম -->
+<main id="home" class="wrap" hidden>
+  <div class="top">
+    <div class="brand">🔔 পুশ ডেমো<small id="who"></small></div>
+    <button class="ic" data-act="logout" aria-label="লগআউট">⎋</button>
+  </div>
 
-  // ==========================================
-  // ১. আপনার ফায়ারবেস কনফিগারেশন
-  // ==========================================
-  const firebaseConfig = {
-    apiKey: "AIzaSyBQXDEFuilbYDsry-ktqWylIzqgPZNbUWQ",
-    authDomain: "mr-techlabe.firebaseapp.com",
-    databaseURL: "https://mr-techlabe-default-rtdb.firebaseio.com",
-    projectId: "mr-techlabe",
-    storageBucket: "mr-techlabe.firebasestorage.app",
-    messagingSenderId: "172436004844",
-    appId: "1:172436004844:web:466012505fa13297eb2ac9",
-    measurementId: "G-E64JT771TM"
-  };
+  <div class="card">
+    <h3>পুশ নোটিফিকেশন</h3>
+    <div class="row"><span>ব্রাউজার সমর্থন</span><b class="pill wait" id="s-sup">…</b></div>
+    <div class="row"><span>অনুমতি</span><b class="pill wait" id="s-perm">…</b></div>
+    <div class="row"><span>ডিভাইস টোকেন</span><b class="pill wait" id="s-tok">…</b></div>
+    <button class="btn" id="p-on" data-act="pushOn">নোটিফিকেশন চালু করুন</button>
+    <button class="btn red" id="p-off" data-act="pushOff" hidden>নোটিফিকেশন বন্ধ করুন</button>
+    <button class="btn alt" id="i-btn" data-act="install" hidden>📲 অ্যাপ হিসেবে ইনস্টল করুন</button>
+    <p class="err" id="p-err"></p>
+    <p class="hint">অ্যাপ বন্ধ থাকলেও বার্তা পেতে "চালু করুন" চাপুন। iPhone এ আগে সাইটটা "Add to Home Screen" করে ইনস্টল করতে হয়।</p>
+  </div>
 
-  const app = initializeApp(firebaseConfig);
-  const messaging = getMessaging(app);
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="margin:0">আপনার বার্তা</h3><button class="btn alt sm" data-act="readAll">সব পড়া হয়েছে</button></div>
+    <div id="list"></div>
+  </div>
+</main>
 
-  // ==========================================
-  // ২. আপনার VAPID কি (Web Push Certificates)
-  // ==========================================
-  const VAPID_KEY = "BJXmr5K0psOK19iiFx2alpYxOlJztTNxqEWLexOr7LOg4b4inIQN3zbaFArw8l7TWoqezeotx-3fJ_7mqUMaaMY";
-
-  // ==========================================
-  // ৩. ডেনো সার্ভার লিঙ্ক
-  // ==========================================
-  const SERVER_URL = "https://oll.mrmostafizur198.deno.net/";
-
-  window.requestPermission = function() {
-      Notification.requestPermission().then((permission) => {
-          if (permission === 'granted') {
-              getToken(messaging, { vapidKey: VAPID_KEY })
-                  .then((currentToken) => {
-                      if (currentToken) {
-                          console.log('FCM Token:', currentToken);
-                          document.getElementById('tokenDisplay').innerText = "অনুমতি সফল হয়েছে! টোকেন অ্যাক্টিভ।";
-
-                          // সার্ভারে রেজিস্ট্রেশন টোকেন পাঠানোর কোড
-                          fetch(SERVER_URL + 'register', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ token: currentToken })
-                          });
-                      } else {
-                          document.getElementById('tokenDisplay').innerText = "কোন টোকেন পাওয়া যায়নি।";
-                      }
-                  })
-                  .catch((err) => {
-                      console.error('Token Error:', err);
-                  });
-          } else {
-              alert('নোটিফিকেশন পারমিশন দেওয়া হয়নি!');
-          }
-      });
-  };
-
-  // ফরগ্রাউন্ডে নোটিফিকেশন পাওয়ার জন্য (যখন অ্যাপ খোলা থাকবে)
-  onMessage(messaging, (payload) => {
-      console.log('মেসেজ এসেছে: ', payload);
-      alert(`নতুন নোটিফিকেশন:\n${payload.notification.title}\n${payload.notification.body}`);
-  });
-</script>
-
+<script src="config.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>
