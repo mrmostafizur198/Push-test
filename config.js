@@ -2,11 +2,13 @@
 var CONFIG = {
   firebase: {
     apiKey: "AIzaSyBQXDEFuilbYDsry-ktqWylIzqgPZNbUWQ",
-    authDomain: "mr-techlabe.firebaseapp.com",
-    projectId: "mr-techlabe",
-    storageBucket: "mr-techlabe.firebasestorage.app",
-    messagingSenderId: "172436004844",
-    appId: "1:172436004844:web:466012505fa13297eb2ac9"
+  authDomain: "mr-techlabe.firebaseapp.com",
+  databaseURL: "https://mr-techlabe-default-rtdb.firebaseio.com",
+  projectId: "mr-techlabe",
+  storageBucket: "mr-techlabe.firebasestorage.app",
+  messagingSenderId: "172436004844",
+  appId: "1:172436004844:web:466012505fa13297eb2ac9",
+  measurementId: "G-E64JT771TM"
     // ডাটাবেস অন্য অঞ্চলে হলে এখানে databaseURL: "https://....firebasedatabase.app" যোগ করুন
   },
   // Firebase Console > Project settings > Cloud Messaging > Web Push certificates > Key pair
